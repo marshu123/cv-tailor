@@ -19,6 +19,14 @@ function tailorCV(cv, job) {
     .reduce((score, word) => score + (weights.get(word) || 0), 0);
 
   const lines = cv.trim().split(/\r?\n/);
+  // Use complete achievement statements, including those pasted without bullets.
+  const achievement = /^(?:[-*•▪–]\s+)?(?:achieved|automated|built|collaborated|completed|created|delivered|designed|developed|implemented|improved|launched|led|managed|maintained|reduced|resolved|supported|tested|wrote)\b.+[.!?]$/i;
+  const highlights = [...new Set(lines.map(line => line.trim()).filter(line => achievement.test(line)))]
+    .map(line => line.replace(/^[-*•▪–]\s+/, ''))
+    .map(line => ({ line, score: relevance(line) }))
+    .filter(({score}) => score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3);
   const isBullet = line => /^\s*(?:[-*•▪–]\s+|\d+[.)]\s+)/u.test(line);
   const indent = line => line.match(/^\s*/)[0].replace(/\t/g, '    ').length;
   let reordered = 0;
@@ -46,5 +54,12 @@ function tailorCV(cv, job) {
     start = end;
   }
 
-  return { draft: lines.join('\n'), matched, missing, reordered };
+  const contentStart = lines.findIndex(line => /^(?:profile|(?:professional |career )?summary|(?:technical )?skills|(?:(?:work|professional|relevant) )?experience|(?:software |selected )?projects|education)\s*:?\s*$/i.test(line.trim()));
+  const addedHighlights = highlights.length > 0 && contentStart > 0
+    && !lines.some(line => /^\s*relevant highlights\s*:?\s*$/i.test(line));
+  if (addedHighlights) {
+    lines.splice(contentStart, 0, 'RELEVANT HIGHLIGHTS', ...highlights.map(({line}) => '- ' + line), '');
+    if (lines[contentStart - 1].trim()) lines.splice(contentStart, 0, '');
+  }
+  return { draft: lines.join('\n'), matched, missing, reordered, addedHighlights };
 }

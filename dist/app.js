@@ -21,12 +21,20 @@ get('tailor-form').addEventListener('submit', event => {
   draft.value = result.draft;
   get('matched').textContent = result.matched.join(', ') || 'No keywords matched.';
   get('missing').textContent = result.missing.join(', ') || 'No additional keywords found.';
-  get('result-note').textContent = result.reordered
-    ? 'Relevant bullets are now higher within their lists. Add any missing keywords only where they describe your experience.'
-    : 'Your bullet order stayed the same. Use the keyword review to guide edits based on your experience.';
+  get('result-note').textContent = result.addedHighlights
+    ? 'Relevant Highlights pulls matching achievements from your CV into a section near the top.'
+    : result.reordered
+      ? 'Relevant bullets are now higher within their lists.'
+      : 'This draft keeps your original order. Use the keyword review to guide your edits.';
   status.textContent = '';
   get('results').hidden = false;
-  get('result-title').focus();
+  draft.focus();
+  draft.setSelectionRange(0, 0);
+  draft.scrollTop = 0;
+});
+
+draft.addEventListener('input', () => {
+  status.textContent = 'Draft updated. Copy and download use your edits.';
 });
 
 get('example').addEventListener('click', () => {
