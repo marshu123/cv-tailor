@@ -25,4 +25,11 @@ h3{font-size:1rem;margin:0}
 #draft{margin-top:8px;min-height:320px}
 #status:empty{display:none}
 footer{padding:24px 0 32px;color:var(--muted);font-size:.9rem}
+#pdf-draft{display:none}
+@page{size:A4;margin:17mm}
+@media print{
+  body.printing-draft{background:white;color:#111}
+  .printing-draft > header,.printing-draft > main{display:none}
+  .printing-draft #pdf-draft{display:block;font:11pt/1.4 system-ui,sans-serif;white-space:pre-wrap;overflow-wrap:anywhere;orphans:3;widows:3}
+}
 @media(max-width:660px){.grid{grid-template-columns:1fr}.wrap{width:calc(100% - 28px)}}

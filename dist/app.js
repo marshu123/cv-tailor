@@ -65,3 +65,24 @@ get('download').addEventListener('click', () => {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
   status.textContent = 'Download started.';
 });
+
+get('pdf').addEventListener('click', () => {
+  if (!draft.value.trim()) {
+    status.textContent = 'Enter some draft text before exporting.';
+    draft.focus();
+    return;
+  }
+  status.textContent = 'Choose Save as PDF in the print dialog.';
+  window.print();
+});
+
+window.addEventListener('beforeprint', () => {
+  const printDraft = get('pdf-draft');
+  printDraft.textContent = draft.value;
+  document.body.classList.toggle('printing-draft', Boolean(draft.value.trim()));
+});
+
+window.addEventListener('afterprint', () => {
+  document.body.classList.remove('printing-draft');
+  get('pdf-draft').textContent = '';
+});
