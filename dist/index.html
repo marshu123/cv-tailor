@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Tailor your CV to a job description for free, directly in your browser.">
+<title>CV Tailor</title>
+<link rel="stylesheet" href="style.css">
+<script src="tailor.js" defer></script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<header><div class="wrap brand"><span class="mark" aria-hidden="true">CV</span> CV Tailor</div></header>
+<main class="wrap">
+  <section class="intro">
+    <h1>Tailor your CV<br>to the job.</h1>
+    <p>Bring your most relevant experience to the top and see which job keywords your CV already covers.</p>
+  </section>
+  <form id="tailor-form">
+    <div class="grid">
+      <section class="card">
+        <label for="cv">Your current CV</label>
+        <p id="cv-help">Paste your CV, including its section headings and bullet points.</p>
+        <textarea id="cv" required aria-describedby="cv-help" placeholder="Paste your CV here"></textarea>
+      </section>
+      <section class="card">
+        <label for="job">Job description</label>
+        <p id="job-help">Paste the job posting, including its responsibilities and requirements.</p>
+        <textarea id="job" required aria-describedby="job-help" placeholder="Paste the job description here"></textarea>
+      </section>
+    </div>
+    <div class="actions"><button>Tailor my CV</button><button type="button" class="secondary" id="example">Try an example</button></div>
+  </form>
+  <section class="card output" id="results" hidden aria-labelledby="result-title">
+    <h2 id="result-title" tabindex="-1">Your tailored CV</h2>
+    <p id="result-note"></p>
+    <div class="grid keywords">
+      <div><h3>Keywords in your CV</h3><p id="matched"></p></div>
+      <div><h3>Keywords to review</h3><p id="missing"></p></div>
+    </div>
+    <label for="draft">Editable draft</label>
+    <textarea id="draft"></textarea>
+    <div class="actions"><button id="copy">Copy CV</button><button class="secondary" id="download">Download TXT</button></div>
+    <p id="status" role="status"></p>
+  </section>
+  <footer>Free to use. Your CV and job description stay in this browser.</footer>
+</main>
+</body>
+</html>
