@@ -4,4 +4,4 @@ Paste a CV and a job description to rank existing bullets by keyword relevance. 
 
 Open dist/index.html to run the app locally. There are no dependencies, accounts, or API keys. Serve the dist directory on a static host to share the app.
 
-The app processes text in the browser. It preserves the original wording and keeps bullets within their original lists.
+The app processes text in the browser. It rephrases matching achievement lines using fixed wording rules and keeps bullets within their original lists.

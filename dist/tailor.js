@@ -7,6 +7,30 @@ function terms(text) {
     .filter(word => word.length > 1 && !ignoredWords.has(word) && /\p{L}/u.test(word));
 }
 
+const achievementVerbs = new Map(Object.entries({
+  achieved: 'Reached', automated: 'Set up automation for', built: 'Developed',
+  collaborated: 'Worked', completed: 'Finished', created: 'Produced',
+  delivered: 'Provided', designed: 'Planned', developed: 'Built',
+  implemented: 'Put in place', improved: 'Enhanced', maintained: 'Kept',
+  managed: 'Oversaw', reduced: 'Lowered', resolved: 'Fixed',
+  supported: 'Helped support', tested: 'Ran tests on', wrote: 'Authored'
+}));
+
+function rewriteAchievement(line, relevance) {
+  const match = line.match(/^(\s*(?:[-*•▪–]\s+)?)([A-Za-z]+)(\s+.+[.!?])(\s*)$/u);
+  if (!match || relevance(match[2] + match[3]) === 0) return line;
+  const [, prefix, verb, remainder, trailing] = match;
+  const action = achievementVerbs.get(verb.toLowerCase());
+  if (!action) return line;
+
+  // Lead with a tool or method already named in the statement when it matches the job.
+  const method = remainder.match(/^(.+?)\s+using\s+([^,;.!?]+)([.!?])$/u);
+  if (method && relevance(method[2]) > 0) {
+    return prefix + 'Using ' + method[2] + ', ' + verb.toLowerCase() + method[1] + method[3] + trailing;
+  }
+  return prefix + action + remainder + trailing;
+}
+
 function tailorCV(cv, job) {
   const weights = new Map();
   for (const word of terms(job)) weights.set(word, (weights.get(word) || 0) + 1);
@@ -18,10 +42,16 @@ function tailorCV(cv, job) {
   const relevance = line => [...new Set(terms(line))]
     .reduce((score, word) => score + (weights.get(word) || 0), 0);
 
-  const lines = cv.trim().split(/\r?\n/);
+  const originalLines = cv.trim().split(/\r?\n/);
+  let rewritten = 0;
+  const lines = originalLines.map(line => {
+    const updated = rewriteAchievement(line, relevance);
+    rewritten += Number(updated !== line);
+    return updated;
+  });
   // Use complete achievement statements, including those pasted without bullets.
   const achievement = /^(?:[-*•▪–]\s+)?(?:achieved|automated|built|collaborated|completed|created|delivered|designed|developed|implemented|improved|launched|led|managed|maintained|reduced|resolved|supported|tested|wrote)\b.+[.!?]$/i;
-  const highlights = [...new Set(lines.map(line => line.trim()).filter(line => achievement.test(line)))]
+  const highlights = [...new Set(originalLines.map(line => line.trim()).filter(line => achievement.test(line)))]
     .map(line => line.replace(/^[-*•▪–]\s+/, ''))
     .map(line => ({ line, score: relevance(line) }))
     .filter(({score}) => score > 0)
@@ -58,8 +88,8 @@ function tailorCV(cv, job) {
   const addedHighlights = highlights.length > 0 && contentStart > 0
     && !lines.some(line => /^\s*relevant highlights\s*:?\s*$/i.test(line));
   if (addedHighlights) {
-    lines.splice(contentStart, 0, 'RELEVANT HIGHLIGHTS', ...highlights.map(({line}) => '- ' + line), '');
+    lines.splice(contentStart, 0, 'RELEVANT HIGHLIGHTS', ...highlights.map(({line}) => '- ' + rewriteAchievement(line, relevance)), '');
     if (lines[contentStart - 1].trim()) lines.splice(contentStart, 0, '');
   }
-  return { draft: lines.join('\n'), matched, missing, reordered, addedHighlights };
+  return { draft: lines.join('\n'), matched, missing, reordered, addedHighlights, rewritten };
 }

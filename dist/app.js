@@ -21,11 +21,13 @@ get('tailor-form').addEventListener('submit', event => {
   draft.value = result.draft;
   get('matched').textContent = result.matched.join(', ') || 'No keywords matched.';
   get('missing').textContent = result.missing.join(', ') || 'No additional keywords found.';
-  get('result-note').textContent = result.addedHighlights
+  get('result-note').textContent = result.rewritten
+    ? 'Reworded ' + result.rewritten + (result.rewritten === 1 ? ' achievement' : ' achievements') + ' to emphasize matches with the job. Review the draft before exporting.'
+    : result.addedHighlights
     ? 'Relevant Highlights pulls matching achievements from your CV into a section near the top.'
     : result.reordered
       ? 'Relevant bullets are now higher within their lists.'
-      : 'This draft keeps your original order. Use the keyword review to guide your edits.';
+      : 'No matching achievement statements could be reworded. Use the keyword review to guide your edits.';
   status.textContent = '';
   get('results').hidden = false;
   draft.focus();
